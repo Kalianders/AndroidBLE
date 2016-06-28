@@ -98,6 +98,7 @@ if (button1State == LOW && button2State == LOW) {
         analogWrite(ledp, fadeValue);
         // wait for 200 milliseconds to set off
         delay(200);
+        //kekkee
         button2State = digitalRead(buttonPin2);
         if (button2State == HIGH) {
             digitalWrite(ledv, LOW);
@@ -202,3 +203,4 @@ uint32_t color = strip.Color(10,0,0);
       }
     }
   }
+  // oketgoethoeh
