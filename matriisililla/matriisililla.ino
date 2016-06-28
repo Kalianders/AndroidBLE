@@ -108,7 +108,6 @@ if (button1State == LOW && button2State == LOW) {
                 button2State = digitalRead(buttonPin2);
             }
         }
-        //oitboiwetboi
     }
     // VIHREÄPOISSA
   if (button2State == HIGH && button1State == HIGH) {
@@ -202,5 +201,4 @@ uint32_t color = strip.Color(10,0,0);
         }
       }
     }
-    //pojetpojrehpojrth koodiapaskeejee
   }
