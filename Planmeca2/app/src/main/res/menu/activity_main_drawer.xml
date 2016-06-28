@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_first_layout"
+            android:icon="@mipmap/ic_person"
+            android:title="Profiili 1" />
+        <item
+            android:id="@+id/nav_second_layout"
+            android:icon="@mipmap/ic_person"
+            android:title="Profiili 2" />
+        <item
+            android:id="@+id/nav_third_layout"
+            android:icon="@mipmap/ic_person"
+            android:title="Profiili 3" />
+
+    </group>
+
+</menu>
