@@ -202,3 +202,4 @@ uint32_t color = strip.Color(10,0,0);
       }
     }
   }
+  // muutosshittiiroönieqrgöoinegt
