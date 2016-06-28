@@ -8,7 +8,7 @@ int ledp = 11;
 int analogPin = 1;
 unsigned char valiarvo = 0;
 unsigned char arvo = 0;
-int fadeValue = 0 ;
+int fadeValue = 0 ; 
 unsigned char lisaa = 51;   //tätä voi säätää kännykällä
  
 int buttonPin1 = 8;
@@ -41,142 +41,135 @@ void loop()
   button1State = digitalRead(buttonPin1);
   button2State = digitalRead(buttonPin2);
   
-if (button1State == LOW && button2State == LOW) {  
-  arvo=analogRead(analogPin)/4;
-   if (valiarvo-10 > arvo || arvo > valiarvo+10){
-    Serial.print(arvo);
-    Serial.print("\n");
-     valiarvo = arvo;
-     fadeValue=valiarvo;
-     if (fadeValue > maxvalue){
-       fadeValue = maxvalue;
-     }
-     if (fadeValue < minvalue){
-       fadeValue = minvalue;
-     }
-     if (fadeValue < 10){
-      fadeValue =0;
-     }
-   }
-     analogWrite(ledv, fadeValue);
-     analogWrite(ledp, fadeValue);
-}
+  if (button1State == LOW && button2State == LOW) {  
+    arvo=analogRead(analogPin)/4;
+      if (valiarvo-10 > arvo || arvo > valiarvo+10){
+        Serial.print(arvo);
+        Serial.print("\n");
+        valiarvo = arvo;
+        fadeValue = valiarvo*(maxvalue-minvalue)/255+minvalue;
+        if (fadeValue < 10){
+          fadeValue =0;
+        }
+      }
+      analogWrite(ledv, fadeValue);
+      analogWrite(ledp, fadeValue);
+  }
 
   if (button1State == HIGH && button2State == LOW) {    
-     fadeValue = fadeValue+lisaa ;
-     if (fadeValue > maxvalue){
-       fadeValue = maxvalue;
-     }
-     // sets the value (range from 0 to 255):
-     analogWrite(ledv, fadeValue);
-     analogWrite(ledp, fadeValue);
-     // wait for 200 milliseconds to set max);
-     millisdelay(200);
-     button1State = digitalRead(buttonPin1);
-     if (button1State == HIGH){
-        analogWrite(ledv, maxvalue);
-        analogWrite(ledp, maxvalue);
-        fadeValue = maxvalue;
-        while (button1State == HIGH && button2State == LOW){
-          button1State = digitalRead(buttonPin1);
-          button2State = digitalRead(buttonPin2);
-        }
-     }
+    fadeValue = fadeValue+lisaa ;
+    if (fadeValue > maxvalue){
+      fadeValue = maxvalue;
+    }
+    // sets the value (range from 0 to 255):
+    analogWrite(ledv, fadeValue);
+    analogWrite(ledp, fadeValue);
+    // wait for 200 milliseconds to set max);
+    millisdelay(200);
+    button1State = digitalRead(buttonPin1);
+    if (button1State == HIGH){
+      analogWrite(ledv, maxvalue);
+      analogWrite(ledp, maxvalue);
+      fadeValue = maxvalue;
+      while (button1State == HIGH && button2State == LOW){
+        button1State = digitalRead(buttonPin1);
+        button2State = digitalRead(buttonPin2);
+      }
+    }
   }
   
-    if (button2State == HIGH && button1State == LOW){
-        fadeValue = fadeValue-lisaa ;
-        if (fadeValue < minvalue){
-          fadeValue = minvalue;
+  if (button2State == HIGH && button1State == LOW){
+    fadeValue = fadeValue-lisaa ;
+    if (fadeValue < minvalue){
+      fadeValue = minvalue;
+    }
+    // sets the value (range from 0 to 255):
+    analogWrite(ledv, fadeValue);
+    analogWrite(ledp, fadeValue);
+    // wait for 200 milliseconds to set off
+    millisdelay(200);
+    button2State = digitalRead(buttonPin2);
+    if (button2State == HIGH) {
+      digitalWrite(ledv, LOW);
+      digitalWrite(ledp, LOW);
+      fadeValue = 0;
+      while (button2State == HIGH && button1State == LOW){
+        button1State = digitalRead(buttonPin1);
+        button2State = digitalRead(buttonPin2);
+      }
+    }
+  }
+  // VIHREÄPOISSA
+  if (button2State == HIGH && button1State == HIGH) {
+    analogWrite(ledv, LOW);
+    fadeValue = 153;
+    analogWrite(ledp, fadeValue);
+    while (button2State == HIGH && button1State == HIGH){
+      button1State = digitalRead(buttonPin1);
+      button2State = digitalRead(buttonPin2);
+    }
+    while(1) {
+      // status led code
+      statusled(); 
+      button1State = digitalRead(buttonPin1);
+      button2State = digitalRead(buttonPin2);
+      if (button1State == LOW && button2State == LOW) {  
+        arvo=analogRead(analogPin)/4;  
+        if (valiarvo-10 > arvo || arvo > valiarvo+10){
+          valiarvo = arvo;
+          fadeValue=valiarvo;
+          if (fadeValue < 10){
+            fadeValue =0;
+          }
         }
+        analogWrite(ledp, fadeValue);
+      } 
+      if (button1State == HIGH && button2State == LOW) {
+        fadeValue = fadeValue+lisaa ;
         // sets the value (range from 0 to 255):
-        analogWrite(ledv, fadeValue);
+        analogWrite(ledp, fadeValue);
+        // wait for 200 milliseconds to set max
+        millisdelay(200);
+        button1State = digitalRead(buttonPin1);
+        if (button1State == HIGH) {
+          digitalWrite(ledp, HIGH);
+          fadeValue = 255;
+          while (button1State == HIGH && button2State == LOW){
+            button1State = digitalRead(buttonPin1);
+            button2State = digitalRead(buttonPin2);
+          }
+        }
+      }
+  
+      if (button2State == HIGH && button1State == LOW){
+        fadeValue = fadeValue-lisaa ;
+        // sets the value (range from 0 to 255):
         analogWrite(ledp, fadeValue);
         // wait for 200 milliseconds to set off
         millisdelay(200);
         button2State = digitalRead(buttonPin2);
         if (button2State == HIGH) {
-            digitalWrite(ledv, LOW);
-            digitalWrite(ledp, LOW);
-            fadeValue = 0;
-            while (button2State == HIGH && button1State == LOW){
-                button1State = digitalRead(buttonPin1);
-                button2State = digitalRead(buttonPin2);
-            }
-        }
-    }
-    // VIHREÄPOISSA
-  if (button2State == HIGH && button1State == HIGH) {
-      analogWrite(ledv, LOW);
-      fadeValue = 153;
-      analogWrite(ledp, fadeValue);
-      while (button2State == HIGH && button1State == HIGH){
-        button1State = digitalRead(buttonPin1);
-        button2State = digitalRead(buttonPin2);
-      }
-      while(1) {
-        // status led code
-       statusled(); 
-        button1State = digitalRead(buttonPin1);
-        button2State = digitalRead(buttonPin2);
-        if (button1State == LOW && button2State == LOW) {  
-  arvo=analogRead(analogPin)/4;  
-   if (valiarvo-10 > arvo || arvo > valiarvo+10){
-     valiarvo = arvo;
-     fadeValue=valiarvo;
-     if (fadeValue < 10){
-      fadeValue =0;
-     }
-   }
-     analogWrite(ledp, fadeValue);
-} 
-        if (button1State == HIGH && button2State == LOW) {
-            fadeValue = fadeValue+lisaa ;
-            // sets the value (range from 0 to 255):
-            analogWrite(ledp, fadeValue);
-            // wait for 200 milliseconds to set max
-            millisdelay(200);
+          digitalWrite(ledp, LOW);
+          fadeValue = 0;
+          while (button2State == HIGH && button1State == LOW){
             button1State = digitalRead(buttonPin1);
-            if (button1State == HIGH) {
-                digitalWrite(ledp, HIGH);
-                fadeValue = 255;
-                while (button1State == HIGH && button2State == LOW){
-                button1State = digitalRead(buttonPin1);
-                button2State = digitalRead(buttonPin2);
-                }
-            }
-        }
-  
-        if (button2State == HIGH && button1State == LOW){
-            fadeValue = fadeValue-lisaa ;
-            // sets the value (range from 0 to 255):
-            analogWrite(ledp, fadeValue);
-            // wait for 200 milliseconds to set off
-            millisdelay(200);
             button2State = digitalRead(buttonPin2);
-            if (button2State == HIGH) {
-                digitalWrite(ledp, LOW);
-                fadeValue = 0;
-                while (button2State == HIGH && button1State == LOW){
-                    button1State = digitalRead(buttonPin1);
-                    button2State = digitalRead(buttonPin2);
-                }
-            }
+          }
         }
-        if (button1State == HIGH && button2State == HIGH) {
-            fadeValue = 153;
-            analogWrite(ledv, fadeValue);
-            analogWrite(ledp, fadeValue);
-            while (button1State == HIGH && button1State == HIGH){
-                button1State = digitalRead(buttonPin1);
-                button2State = digitalRead(buttonPin2);
-            }
-            break;
+      }
+      if (button1State == HIGH && button2State == HIGH) {
+        fadeValue = 153;
+        analogWrite(ledv, fadeValue);
+        analogWrite(ledp, fadeValue);
+        while (button1State == HIGH && button1State == HIGH){
+          button1State = digitalRead(buttonPin1);
+          button2State = digitalRead(buttonPin2);
         }
+        break;
       }
     }
   }
-
+}
 
 
 void millisdelay(unsigned long aika){
@@ -206,6 +199,7 @@ if (Serial.available() > 0) {   // something came across serial
   }
 }
 
+
 void changeparameter(unsigned int value){
   if (value >= 1000 && value < 2000){
     minvalue = value - 1000;
@@ -216,30 +210,30 @@ void changeparameter(unsigned int value){
   Serial.print("ok");
 }
 
-void statusled()
-{                              // status led code
+
+void statusled(){// status led code
 
   if (fadeValue == 0) {        // Standby, blue LED
     uint32_t color = strip.Color(0,0,10);
-      for(uint16_t i=0; i<strip.numPixels(); i++) {
-        strip.setPixelColor(i, color);
-        strip.show();
-      }
+    for(uint16_t i=0; i<strip.numPixels(); i++) {
+      strip.setPixelColor(i, color);
+      strip.show();
+    }
   }
 
   if (fadeValue > 0) {        // Light ON, green LED
     uint32_t color = strip.Color(0,10,0);
-      for(uint16_t i=0; i<strip.numPixels(); i++) {
-        strip.setPixelColor(i, color);
-        strip.show();
-      }
+    for(uint16_t i=0; i<strip.numPixels(); i++) {
+      strip.setPixelColor(i, color);
+      strip.show();
+    }
   }
 
   if (statusint == 2) {      // ERROR, red LED
     uint32_t color = strip.Color(10,0,0);
-      for(uint16_t i=0; i<strip.numPixels(); i++) {
-        strip.setPixelColor(i, color);
-        strip.show();
-      }
+    for(uint16_t i=0; i<strip.numPixels(); i++) {
+      strip.setPixelColor(i, color);
+      strip.show();
+    }
   }
 }
