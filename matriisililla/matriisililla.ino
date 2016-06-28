@@ -15,9 +15,11 @@ int buttonPin1 = 8;
 int buttonPin2 = 7;
 int button1State = 0;
 int button2State = 0;
-unsigned char minValue = 204;  //säädetään apillä
-unsigned char maxValue = 51; //säädetään apillä
+unsigned char minValue = 0;  //säädetään apillä
+unsigned char maxValue = 255; //säädetään apillä
 int statusint = 0; // 0 standby, 1 on, 2 off
+unsigned int integerValue=0;  // Max value is 65535
+char incomingByte;
 
 void setup()
 {
@@ -26,11 +28,13 @@ void setup()
   pinMode(buttonPin2, INPUT);
   strip.begin();
   strip.show();
+
 }
  
 void loop()
 {
   statusled();
+  serialfunc();
   
   
   //------arduino push button code----------------
@@ -58,7 +62,7 @@ if (button1State == LOW && button2State == LOW) {
      analogWrite(ledv, fadeValue);
      analogWrite(ledp, fadeValue);
      // wait for 200 milliseconds to set max);
-     delay(200);
+     millisdelay(200);
      button1State = digitalRead(buttonPin1);
      if (button1State == HIGH){
         digitalWrite(ledv, HIGH);
@@ -77,7 +81,7 @@ if (button1State == LOW && button2State == LOW) {
         analogWrite(ledv, fadeValue);
         analogWrite(ledp, fadeValue);
         // wait for 200 milliseconds to set off
-        delay(200);
+        millisdelay(200);
         button2State = digitalRead(buttonPin2);
         if (button2State == HIGH) {
             digitalWrite(ledv, LOW);
@@ -127,10 +131,10 @@ uint32_t color = strip.Color(10,0,0);
         button2State = digitalRead(buttonPin2);
         if (button1State == LOW && button2State == LOW) {  
   arvo=analogRead(analogPin)/4;  
-   if (valiarvo-3 > arvo || arvo > valiarvo+3){
+   if (valiarvo-10 > arvo || arvo > valiarvo+10){
      valiarvo = arvo;
      fadeValue=valiarvo;
-     if (fadeValue < 4){
+     if (fadeValue < 10){
       fadeValue =0;
      }
    }
@@ -141,7 +145,7 @@ uint32_t color = strip.Color(10,0,0);
             // sets the value (range from 0 to 255):
             analogWrite(ledp, fadeValue);
             // wait for 200 milliseconds to set max
-            delay(200);
+            millisdelay(200);
             button1State = digitalRead(buttonPin1);
             if (button1State == HIGH) {
                 digitalWrite(ledp, HIGH);
@@ -158,7 +162,7 @@ uint32_t color = strip.Color(10,0,0);
             // sets the value (range from 0 to 255):
             analogWrite(ledp, fadeValue);
             // wait for 200 milliseconds to set off
-            delay(200);
+            millisdelay(200);
             button2State = digitalRead(buttonPin2);
             if (button2State == HIGH) {
                 digitalWrite(ledp, LOW);
@@ -185,8 +189,42 @@ uint32_t color = strip.Color(10,0,0);
 
 
 
+void millisdelay(unsigned long aika){
+  unsigned long currentMillis = millis();
+  unsigned long previousMillis = currentMillis;
+  while ((currentMillis - previousMillis) < aika){
+    currentMillis = millis();
+    serialfunc();
+  }
+}
 
 
+void serialfunc(){
+  
+if (Serial.available() > 0) {   // something came across serial
+    integerValue = 0;         // throw away previous integerValue
+    while(1) {            // force into a loop until 'n' is received
+      incomingByte = Serial.read();
+      if (incomingByte == '\n') break;   // exit the while(1), we're done receiving
+      if (incomingByte == -1) continue;  // if no characters are in the buffer read() returns -1
+      integerValue *= 10;  // shift left 1 decimal place
+      // convert ASCII to integer, add, and shift left 1 decimal place
+      integerValue = ((incomingByte - 48) + integerValue);
+      if (incomingByte != -1) changeparameter(integerValue); 
+    }
+    Serial.println(integerValue);   // Do something with the value
+  }
+}
+
+void changeparameter(unsigned int value){
+  if (value > 1000 && value < 2000){
+    minValue = value - 1000;
+  }
+  if (value > 2000 && value < 3000){
+    maxValue = value - 2000;
+  }
+  Serial.print("ok");
+}
 
 void statusled()
 {                              // status led code
