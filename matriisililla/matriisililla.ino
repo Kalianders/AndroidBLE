@@ -8,15 +8,15 @@ int ledp = 11;
 int analogPin = 1;
 unsigned char valiarvo = 0;
 unsigned char arvo = 0;
-unsigned char fadeValue = 0 ;
+int fadeValue = 0 ;
 unsigned char lisaa = 51;   //tätä voi säätää kännykällä
  
 int buttonPin1 = 8;
 int buttonPin2 = 7;
 int button1State = 0;
 int button2State = 0;
-unsigned char minValue = 0;  //säädetään apillä
-unsigned char maxValue = 255; //säädetään apillä
+unsigned char minvalue = 0;  //säädetään apillä
+unsigned char maxvalue = 255; //säädetään apillä
 int statusint = 0; // 0 standby, 1 on, 2 off
 unsigned int integerValue=0;  // Max value is 65535
 char incomingByte;
@@ -38,6 +38,9 @@ void loop()
   
   
   //------arduino push button code----------------
+  button1State = digitalRead(buttonPin1);
+  button2State = digitalRead(buttonPin2);
+  
 if (button1State == LOW && button2State == LOW) {  
   arvo=analogRead(analogPin)/4;
    if (valiarvo-10 > arvo || arvo > valiarvo+10){
@@ -45,6 +48,12 @@ if (button1State == LOW && button2State == LOW) {
     Serial.print("\n");
      valiarvo = arvo;
      fadeValue=valiarvo;
+     if (fadeValue > maxvalue){
+       fadeValue = maxvalue;
+     }
+     if (fadeValue < minvalue){
+       fadeValue = minvalue;
+     }
      if (fadeValue < 10){
       fadeValue =0;
      }
@@ -53,11 +62,11 @@ if (button1State == LOW && button2State == LOW) {
      analogWrite(ledp, fadeValue);
 }
 
-  
-  button1State = digitalRead(buttonPin1);
-  button2State = digitalRead(buttonPin2);
   if (button1State == HIGH && button2State == LOW) {    
      fadeValue = fadeValue+lisaa ;
+     if (fadeValue > maxvalue){
+       fadeValue = maxvalue;
+     }
      // sets the value (range from 0 to 255):
      analogWrite(ledv, fadeValue);
      analogWrite(ledp, fadeValue);
@@ -65,9 +74,9 @@ if (button1State == LOW && button2State == LOW) {
      millisdelay(200);
      button1State = digitalRead(buttonPin1);
      if (button1State == HIGH){
-        digitalWrite(ledv, HIGH);
-        digitalWrite(ledp, HIGH);
-        fadeValue = 255;
+        analogWrite(ledv, maxvalue);
+        analogWrite(ledp, maxvalue);
+        fadeValue = maxvalue;
         while (button1State == HIGH && button2State == LOW){
           button1State = digitalRead(buttonPin1);
           button2State = digitalRead(buttonPin2);
@@ -77,6 +86,9 @@ if (button1State == LOW && button2State == LOW) {
   
     if (button2State == HIGH && button1State == LOW){
         fadeValue = fadeValue-lisaa ;
+        if (fadeValue < minvalue){
+          fadeValue = minvalue;
+        }
         // sets the value (range from 0 to 255):
         analogWrite(ledv, fadeValue);
         analogWrite(ledp, fadeValue);
@@ -104,29 +116,7 @@ if (button1State == LOW && button2State == LOW) {
       }
       while(1) {
         // status led code
-if (fadeValue == 0) {
-uint32_t color = strip.Color(0,0,10);
-  for(uint16_t i=0; i<strip.numPixels(); i++) {
-    strip.setPixelColor(i, color);
-    strip.show();
-  }
-}
-
-if (fadeValue > 0) {
-uint32_t color = strip.Color(0,10,0);
-  for(uint16_t i=0; i<strip.numPixels(); i++) {
-    strip.setPixelColor(i, color);
-    strip.show();
-  }
-}
-
-if (statusint == 2) {
-uint32_t color = strip.Color(10,0,0);
-  for(uint16_t i=0; i<strip.numPixels(); i++) {
-    strip.setPixelColor(i, color);
-    strip.show();
-  }
-}        
+       statusled(); 
         button1State = digitalRead(buttonPin1);
         button2State = digitalRead(buttonPin2);
         if (button1State == LOW && button2State == LOW) {  
@@ -217,11 +207,11 @@ if (Serial.available() > 0) {   // something came across serial
 }
 
 void changeparameter(unsigned int value){
-  if (value > 1000 && value < 2000){
-    minValue = value - 1000;
+  if (value >= 1000 && value < 2000){
+    minvalue = value - 1000;
   }
   if (value > 2000 && value < 3000){
-    maxValue = value - 2000;
+    maxvalue = value - 2000;
   }
   Serial.print("ok");
 }
