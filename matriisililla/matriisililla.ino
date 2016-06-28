@@ -30,38 +30,18 @@ void setup()
  
 void loop()
 {
-// status led code
-if (fadeValue == 0) {
-uint32_t color = strip.Color(0,0,10);
-  for(uint16_t i=0; i<strip.numPixels(); i++) {
-    strip.setPixelColor(i, color);
-    strip.show();
-  }
-}
-
-if (fadeValue > 0) {
-uint32_t color = strip.Color(0,10,0);
-  for(uint16_t i=0; i<strip.numPixels(); i++) {
-    strip.setPixelColor(i, color);
-    strip.show();
-  }
-}
-
-if (statusint == 2) {
-uint32_t color = strip.Color(10,0,0);
-  for(uint16_t i=0; i<strip.numPixels(); i++) {
-    strip.setPixelColor(i, color);
-    strip.show();
-  }
-}
+  statusled();
+  
   
   //------arduino push button code----------------
 if (button1State == LOW && button2State == LOW) {  
-  arvo=analogRead(analogPin)/4;  
-   if (valiarvo-3 > arvo || arvo > valiarvo+3){
+  arvo=analogRead(analogPin)/4;
+   if (valiarvo-10 > arvo || arvo > valiarvo+10){
+    Serial.print(arvo);
+    Serial.print("\n");
      valiarvo = arvo;
      fadeValue=valiarvo;
-     if (fadeValue < 4){
+     if (fadeValue < 10){
       fadeValue =0;
      }
    }
@@ -202,3 +182,36 @@ uint32_t color = strip.Color(10,0,0);
       }
     }
   }
+
+
+
+
+
+
+void statusled()
+{                              // status led code
+
+  if (fadeValue == 0) {        // Standby, blue LED
+    uint32_t color = strip.Color(0,0,10);
+      for(uint16_t i=0; i<strip.numPixels(); i++) {
+        strip.setPixelColor(i, color);
+        strip.show();
+      }
+  }
+
+  if (fadeValue > 0) {        // Light ON, green LED
+    uint32_t color = strip.Color(0,10,0);
+      for(uint16_t i=0; i<strip.numPixels(); i++) {
+        strip.setPixelColor(i, color);
+        strip.show();
+      }
+  }
+
+  if (statusint == 2) {      // ERROR, red LED
+    uint32_t color = strip.Color(10,0,0);
+      for(uint16_t i=0; i<strip.numPixels(); i++) {
+        strip.setPixelColor(i, color);
+        strip.show();
+      }
+  }
+}
