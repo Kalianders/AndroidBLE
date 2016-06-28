@@ -108,6 +108,7 @@ if (button1State == LOW && button2State == LOW) {
                 button2State = digitalRead(buttonPin2);
             }
         }
+        //asgsdgasdg
     }
     // VIHREÄPOISSA
   if (button2State == HIGH && button1State == HIGH) {
