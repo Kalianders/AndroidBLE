@@ -113,6 +113,7 @@ void loop()
       statusled(); 
       button1State = digitalRead(buttonPin1);
       button2State = digitalRead(buttonPin2);
+    
       if (button1State == LOW && button2State == LOW) {  
         arvo=analogRead(analogPin)/4;  
         if (valiarvo-10 > arvo || arvo > valiarvo+10){
@@ -124,6 +125,7 @@ void loop()
         }
         analogWrite(ledp, fadeValue);
       } 
+      
       if (button1State == HIGH && button2State == LOW) {
         fadeValue = fadeValue+lisaa ;
         // sets the value (range from 0 to 255):
@@ -157,6 +159,7 @@ void loop()
           }
         }
       }
+      
       if (button1State == HIGH && button2State == HIGH) {
         fadeValue = 153;
         analogWrite(ledv, fadeValue);
