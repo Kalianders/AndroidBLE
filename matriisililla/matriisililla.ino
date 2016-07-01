@@ -211,7 +211,7 @@ void buttonfunc4(int button1State, int button2State) {
     }
 }
 void buttonfunc5(int button1State, int button2State) {
-    // VIHREÃ„POISSA
+    // VIHREÄPOISSA
     if (button2State == HIGH && button1State == HIGH) {
         analogWrite(ledv, LOW);
         fadeValue = 153;
