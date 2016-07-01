@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<gatt>
+
+	<!-- Generic Access Service -->
+	<service uuid="1800">
+		
+		<!-- Device name -->
+		<characteristic uuid="2a00">
+			<properties read="true" const="true" />
+			<value>BGM111</value>
+		</characteristic>
+
+		<!-- Appearances -->
+		<characteristic uuid="2a01">
+			<properties read="true" const="true" />
+			<value type="hex">0768</value>
+		</characteristic>
+
+	</service>
+
+	<!-- Device Information Service -->
+	<!-- https://developer.bluetooth.org/gatt/services/Pages/ServiceViewer.aspx?u=org.bluetooth.service.device_information.xml -->
+	<service uuid="180A">
+
+		<description>Device Information Service</description>
+	
+		<!-- Manufacturer name string -->
+		<!-- https://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.manufacturer_name_string.xml -->
+		<characteristic uuid="2A29">
+			<properties read="true" const="true" />
+			<value>Silicon Labs</value>
+		</characteristic>
+
+		<!-- Model number string string -->
+		<!-- https://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.model_number_string.xml -->
+		<characteristic uuid="2A24">
+			<properties read="true" const="true" />
+			<value>BGM111</value>
+		</characteristic>
+
+		<!-- Serial number string -->
+		<!-- https://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.system_id.xml -->
+		<characteristic uuid="2A23">
+			<properties read="true" const="true" />
+			<value type="hex">000780000047</value>
+		</characteristic>
+
+	</service>
+	
+	<!-- Link Loss Service -->
+	<!-- https://developer.bluetooth.org/gatt/services/Pages/ServiceViewer.aspx?u=org.bluetooth.service.link_loss.xml -->	
+	<service uuid="1803" advertise="true" >
+        <description>Link Loss</description>
+	
+		<!-- Alert Level -->	
+		<characteristic uuid="2a06" id="xgatt_lloss">
+			<properties read="true" write="true" />
+			<value length="1" />
+		</characteristic>
+		
+     </service>
+
+	<!-- Immediate Alert Service -->
+	<!-- https://developer.bluetooth.org/gatt/services/Pages/ServiceViewer.aspx?u=org.bluetooth.service.immediate_alert.xml -->
+	<service uuid="1802" advertise="true" >
+		<description>Immediate Alert</description>
+
+		<!-- Alert Level -->
+		<characteristic uuid="2a06" id="xgatt_alert">
+			<properties write_no_response="true" />
+			<value length="1" />
+		</characteristic>
+
+	</service>
+
+	<!-- TX Power Service -->
+	<!-- https://developer.bluetooth.org/gatt/services/Pages/ServiceViewer.aspx?u=org.bluetooth.service.immediate_alert.xml -->	
+	<service uuid="1804" advertise="true" >
+
+		<description>TX Power</description>
+
+		<!-- TX Power Level -->		
+		<characteristic uuid="2a07" id="xgatt_txpower">
+			<properties read="true"/>
+			<value length="1" />
+		</characteristic>
+
+	</service>
+
+	<!-- Health Thermometer Service -->
+	<!-- https://developer.bluetooth.org/gatt/services/Pages/ServiceViewer.aspx?u=org.bluetooth.service.health_thermometer.xml -->
+	<service uuid="1809" advertise="true">
+
+		<description>Health Thermometer Service</description>
+
+		<!-- https://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.temperature_measurement.xml -->
+		<!-- Temperature measurement -->
+		<characteristic uuid="2a1c" id="xgatt_temperature_celsius">
+			<!-- Read property is not included in the HTM service specification -->
+			<!-- It's been added so the data can be read from Android devices -->
+			<properties indicate="true" read="true" />
+			<value type="hex">0000000000</value>
+		</characteristic>
+
+	</service>
+
+</gatt>
