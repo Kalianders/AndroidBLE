@@ -207,6 +207,7 @@ void buttonfunc4(int button1State, int button2State) { // VIHREÄPOISSA
         button1State = digitalRead(buttonPin1);
         button2State = digitalRead(buttonPin2);
     }
+<<<<<<< HEAD
     while (1) {
         statusled();
         serialfunc();
@@ -222,6 +223,18 @@ void buttonfunc4(int button1State, int button2State) { // VIHREÄPOISSA
                 }
                 analogWrite(ledp, fadeValue);
             }
+=======
+}
+void buttonfunc5(int button1State, int button2State) {
+    // VIHRE�POISSA
+    if (button2State == HIGH && button1State == HIGH) {
+        analogWrite(ledv, LOW);
+        fadeValue = 153;
+        analogWrite(ledp, fadeValue);
+        while (button2State == HIGH && button1State == HIGH) {
+            button1State = digitalRead(buttonPin1);
+            button2State = digitalRead(buttonPin2);
+>>>>>>> origin/master
         }
         if (button1State == HIGH && button2State == LOW) {
             fadeValue = fadeValue + lisaa ;
