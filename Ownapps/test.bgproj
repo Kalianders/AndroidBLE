@@ -10,10 +10,10 @@
     
 	<!-- BGScript source code -->
 	<scripting>
-		<script in="bgm111demo.bgs" />
+		<script in="test.bgs" />
 	</scripting>
 	
 	<!-- Firmware output file -->
-	<image out="bgm111demo.bin" />
+	<image out="test.bin" />
    
 </project>
