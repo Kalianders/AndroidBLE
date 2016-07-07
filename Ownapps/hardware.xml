@@ -5,6 +5,26 @@
     <sleep enable="true" />
     <txpower power="15" bias="5" />
     <script enable="true" />
-    <port index="0" pull="down" />
-    <port index="1" pull="down" />
+	
+	<!-- UART configuration -->
+	<!-- Settings: @115200bps, no RTS/CTS and BGAPI serial protocol is enabled -->
+	<uart index="1" baud="115200" flowcontrol="false" bgapi="false" />
+
+	<!-- GPIO configuration needed for WSTK UART to work-->
+	<gpio port="A" pin="5" mode="pushpull" out="1"/>
+	<gpio port="A" pin="3" mode="pushpull" out="0"/>
+	
+	<!-- GPIO configuration for LED1 -->
+	<gpio port="C" pin="9" mode="pushpull" out="0"/>
+	<gpio port="A" pin="0" mode="pushpull" out="0"/>
+	<gpio port="A" pin="1" mode="pushpull" out="0"/>
+
+	<!-- ADC inputs: using PB11 and PF5 for testing. These are accessible in the devkit expansion header -->
+	<gpio port="B" pin="11" mode="input" out="0"/>
+	<gpio port="F" pin="5" mode="input" out="0"/>
+	
+	<!-- ADCs enabled -->
+	<adc enable="true" />
+
+	<ctune value="0" />
 </hardware>
