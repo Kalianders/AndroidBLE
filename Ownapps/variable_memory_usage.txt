@@ -1,4 +1,4 @@
-0
+38
 0:0	ENDPOINT_FLAG_ACTIVE
 0:0	ENDPOINT_FLAG_BGAPI
 0:0	ENDPOINT_FLAG_CLOSING
@@ -171,6 +171,21 @@
 0:0	test_pkt_11110000
 0:0	test_pkt_carrier
 0:0	test_pkt_prbs9
+0:0	xgatt_adc_voltage
 0:0	xgatt_alert
 0:0	xgatt_lloss
 0:0	xgatt_txpower
+0:0	endpoint_uart1
+0:0	led1_bank
+0:0	led2_bank
+0:0	led_pin_maskC9
+0:0	led_pin_maskC7
+0:4	ticker
+4:6	string
+10:4	connected
+14:4	conn_handle
+18:4	res
+22:4	n
+26:4	adc_value
+30:4	adc_conv
+34:4	temp

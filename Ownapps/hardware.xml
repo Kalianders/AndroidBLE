@@ -1,10 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <hardware>
-    <sleeposc enable="true" ppm="30" />
-    <usb enable="false" endpoint="none" />
-    <sleep enable="true" />
-    <txpower power="15" bias="5" />
-    <script enable="true" />
 	
 	<!-- UART configuration -->
 	<!-- Settings: @115200bps, no RTS/CTS and BGAPI serial protocol is enabled -->
@@ -16,8 +11,7 @@
 	
 	<!-- GPIO configuration for LED1 -->
 	<gpio port="C" pin="9" mode="pushpull" out="0"/>
-	<gpio port="A" pin="0" mode="pushpull" out="0"/>
-	<gpio port="A" pin="1" mode="pushpull" out="0"/>
+	<gpio port="C" pin="7" mode="pushpull" out="0"/>
 
 	<!-- ADC inputs: using PB11 and PF5 for testing. These are accessible in the devkit expansion header -->
 	<gpio port="B" pin="11" mode="input" out="0"/>
