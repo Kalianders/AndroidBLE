@@ -1,0 +1,56 @@
+# Constants:
+const endpoint_uart1   = 2
+
+# LED0 is mapped to pin C9,C7
+const led1_bank      = 2
+const led2_bank      = 2
+const led_pin_maskC9  = $200
+const led_pin_maskC7  = $80
+
+# Variables:
+dim string(6)
+dim connected
+dim conn_handle
+dim res
+dim adc_value
+dim adc_conv
+dim temp
+
+# this is a utility function to print passkey but we can use it also to print
+# out ADC values...
+procedure print_passkey(data)
+
+    string(0:1) = (data / 100000) + (data / -1000000 * 10) + 48
+    string(1:1) = (data / 10000) + (data / -100000 * 10) + 48
+	string(2:1) = (data / 1000) + (data / -10000 * 10) + 48
+	string(3:1) = (data / 100) + (data / -1000 * 10) + 48
+	string(4:1) = (data / 10) + (data / -100 * 10) + 48
+	string(5:1) = data + (data / 10 * -10) + 48
+	
+	call endpoint_send(endpoint_uart1, 6, string(0:6))
+	
+end 
+
+# Boot event listener - Generated when the module is powered up or reset
+event system_boot(major, minor, patch, build, bootloader, hw)
+
+	call endpoint_send(endpoint_uart1, 20, "Boot. Build number: ")	
+	call print_passkey(build)
+	call endpoint_send(endpoint_uart1, 2, "\r\n")
+	
+	# Set advertisement interval to 100ms, use all three ADV channels
+	call le_gap_set_adv_parameters(160,160,7)
+
+	# Start Bluetooth LE advertisements and enable connections
+	call le_gap_set_mode(2,2)
+			
+	# setup timer with 1000ms interval
+	call hardware_set_soft_timer(32768,0,0)
+		
+	# configure ADC reference voltage:
+	call endpoint_send(endpoint_uart1, 21, "ADC reference: VDD \r\n")
+	call hardware_config_adc_reference(2)(res)
+	
+end
+
+event hardware_interrupt(mask,3276)
