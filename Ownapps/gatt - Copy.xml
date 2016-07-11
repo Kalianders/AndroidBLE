@@ -112,7 +112,7 @@
 		
     </service>
 	
-	<service uuid="8409f408-63e3-4eea-aaf4-762ddec5319c" advertise="false">
+	    <service uuid="8409f408-63e3-4eea-aaf4-762ddec5319c" advertise="false">
         <description>Button Service</description>
         
         <!-- one-byte characteristic that can be written by client. This can trigger some
@@ -133,4 +133,7 @@
         
     </service>
     
+</gatt>
+
+
 </gatt>

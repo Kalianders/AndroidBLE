@@ -1,4 +1,4 @@
-84
+38
 0:0	ENDPOINT_FLAG_ACTIVE
 0:0	ENDPOINT_FLAG_BGAPI
 0:0	ENDPOINT_FLAG_CLOSING
@@ -65,7 +65,6 @@
 0:0	bt_connection_sniff
 0:0	bt_gap_discover_generic
 0:0	bt_gap_discover_limited
-0:0	control_byte
 0:0	endpoint_connection
 0:0	endpoint_drop
 0:0	endpoint_free
@@ -168,33 +167,20 @@
 0:0	sm_io_capability_keyboarddisplay
 0:0	sm_io_capability_keyboardonly
 0:0	sm_io_capability_noinputnooutput
-0:0	status_vector
 0:0	test_pkt_10101010
 0:0	test_pkt_11110000
 0:0	test_pkt_carrier
 0:0	test_pkt_prbs9
-0:0	uart_ep
-0:0	btn0_bank
-0:0	btn0_pin_mask
-0:0	btn1_bank
-0:0	btn1_pin_mask
-0:0	ASCII_ESC
+0:0	xgatt_adc_voltage
+0:0	endpoint_uart1
+0:0	led_bank
+0:0	led_pin_mask
 0:4	ticker
 4:6	string
-10:4	strlen
-14:4	connected
-18:4	conn_handle
-22:4	res
-26:4	read_result
-30:4	n
+10:4	connected
+14:4	conn_handle
+18:4	res
+22:4	n
+26:4	adc_value
+30:4	adc_conv
 34:4	temp
-38:20	status_bytes
-58:2	button_states
-60:0	btn_state_pressed
-60:0	btn_state_released
-60:0	btn_state_undefined
-60:8	button_timestamps
-68:4	time_delta
-72:4	num_notifications
-76:4	notif_countdown
-80:4	calllongpress

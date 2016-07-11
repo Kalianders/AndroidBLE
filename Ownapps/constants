@@ -2,3 +2,5 @@ xgatt_lloss 15
 xgatt_alert 18
 xgatt_txpower 21
 xgatt_adc_voltage 24
+control_byte 29
+status_vector 32

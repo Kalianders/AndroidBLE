@@ -1,29 +1,35 @@
+
 # Constants:
 const uart_ep = 2
 
-# LED0 is mapped to pin C9,C7
-const led1_bank      = 2
-const led2_bank      = 2
-const led3_bank      = 5
-const led_pin_maskC9  = $200
-const led_pin_maskC7  = $80
-const led_pin_maskF5 = $20
+# BTN0 is mapped to pin F6
+const btn0_bank      = 5
+const btn0_pin_mask  = $40
+
+# BTN1 is mapped to pin F7
+const btn1_bank      = 5
+const btn1_pin_mask  = $80
+
 
 # some ASCII codes (used in the debug command interface)
 const ASCII_ESC = 27
 
 # Variables:
 dim ticker
+
 dim string(6)
-dim strlen
+dim strlen 
 
 dim connected
 dim conn_handle
+
 dim res
-dim adc_value
-dim adc_conv
-dim temp
 dim read_result
+
+dim n
+
+dim temp
+
 dim status_bytes(20)
 
 dim button_states(2)    # state for each button 
@@ -32,10 +38,64 @@ const btn_state_released = 2
 const btn_state_undefined = 0 
 
 dim button_timestamps(8) # timestamp when button was pressed (2 * 4 bytes)
+
 dim time_delta
+
 dim num_notifications
 dim notif_countdown
 dim calllongpress
+
+# print a nibble
+procedure print_nibble(nibble)
+
+    n = nibble
+
+    if n < $a then
+        n = n + $30
+    else
+        n = n + $37
+    end if
+
+    call endpoint_send(uart_ep, 1, n)
+end
+
+# print hex values (range 0..255 -> output 0x00..0xFF)
+procedure print_hex(hex)
+    call print_nibble(hex/16)
+    call print_nibble(hex&$f)
+end
+
+# print 16-bit hex values (range 0..65535 -> output 0x00..0xFFFF)
+procedure print_hex16(hex)
+    
+    temp = (hex >> 8) & $ff
+    call print_nibble(temp/16)
+    call print_nibble(temp&$f)
+    
+    temp = hex & $ff
+    call print_nibble(temp/16)
+    call print_nibble(temp&$f)
+end
+
+# print 32-bit hex values (range 0..65535 -> output 0x00..0xFFFF)
+procedure print_hex32(hex)
+    
+    temp = (hex >> 24) & $ff
+    call print_nibble(temp/16)
+    call print_nibble(temp&$f)
+    
+    temp = (hex >> 16) & $ff
+    call print_nibble(temp/16)
+    call print_nibble(temp&$f)
+    
+    temp = (hex >> 8) & $ff
+    call print_nibble(temp/16)
+    call print_nibble(temp&$f)
+    
+    temp = hex & $ff
+    call print_nibble(temp/16)
+    call print_nibble(temp&$f)
+end
 
 # helper function to print integer to UART
 procedure print_int32(int32_value)
@@ -51,7 +111,9 @@ event system_boot(major, minor, patch, build, bootloader, hw)
 
     call endpoint_send(uart_ep, 20, "Boot. Build number: ") 
     call print_int32(build)
-    call endpoint_send(uart_ep, 2, "\r\n") 
+    call endpoint_send(uart_ep, 2, "\r\n")  
+
+    
     num_notifications = 30 
     
     # Set advertisement interval to 100ms, use all three ADV channels
@@ -63,14 +125,10 @@ event system_boot(major, minor, patch, build, bootloader, hw)
     # setup timer with 100ms interval
     call hardware_set_soft_timer(3276,0,0)
 	
-	# configure ADC reference voltage:
-	call endpoint_send(uart_ep, 21, "ADC reference: VDD \r\n")
-	call hardware_config_adc_reference(2)(res)
-	
-	#configure douplepress variable
-	calllongpress = 0
-	
+	calllongpress = 0 # configure douple pressing variable
+        
 end
+
 
 event le_connection_opened(address, address_type, master, connection, bonding)
 
@@ -92,6 +150,15 @@ event le_connection_closed(reason, connection)
     call le_gap_set_mode(2,2)
     
 end
+
+# This event is triggered whenever the connection parameters are changed and at any time a connection is established.
+event le_connection_parameters(connection,interval,latency,timeout,security_mode)
+
+    call endpoint_send(uart_ep, 35, "connection update, security mode = ")
+    call print_nibble(security_mode)
+    call endpoint_send(uart_ep, 2, "\r\n")
+    
+end 
 
 
 # This event indicates incoming data from an endpoint. Used here to implement simple debug
@@ -116,35 +183,31 @@ end
 event gatt_server_attribute_value(connection,attribute,att_opcode,offset,value_len, value_data)
     
     if attribute = control_byte then
+    
         num_notifications = value_data(0:1) 
+        
         call endpoint_send(uart_ep, 25, "Num notifications set to ")
         call print_int32(num_notifications)
         call endpoint_send(uart_ep, 2, "\r\n")
     end if
-	
 end
-
 
 # Software timer event - generated when software timer runs out
 event hardware_soft_timer(handle)
 
-	# ADC test: 
-
-	# read voltage at pin PC9
-	call hardware_read_adc(2, 9)(res, adc_value)
-	
-	# convert raw ADC value to millivolts:
-	adc_conv = adc_value * 3300 / 4096
-	call print_int32(adc_conv)
-	call endpoint_send(uart_ep, 2, "\r\n")
-	
-	# if connection is open, send notification to client including latest ADC reading in mV
-	if connected > 0 then
-		# call gatt_server_send_characteristic_notification(connection,characteristic,value_len, value_data)(result)
-		call gatt_server_send_characteristic_notification($ff, xgatt_adc_voltage, 2, adc_conv)
-	end if
-		
+    if connected > 0 & notif_countdown > 0 then 
+    
+        notif_countdown = notif_countdown - 1 # countdown until zero reached
+        call gatt_server_send_characteristic_notification($ff, status_vector, 1, status_bytes(0:1))
+        
+        status_bytes(0) = status_bytes(0) + 1
+        
+        if notif_countdown = 0 then
+            call endpoint_send(uart_ep, 24, "Last notification sent\r\n")
+        end if 
+    end if  
 end
+
 
 procedure button_press_short(button)
 
@@ -153,7 +216,6 @@ procedure button_press_short(button)
     else 
         call endpoint_send(uart_ep, 23, "Short press, Button 1\r\n")
     end if 
-	
 end 
 
 
@@ -178,24 +240,26 @@ procedure button_press_long(button)
             # next notifications are sent from the timer handler.... 
         end if
     end if 
-	
-end #procedure long press
-
+end 
 
 procedure button_press_double()
-
 	call endpoint_send(uart_ep, 23, "Both Buttons pressed\r\n")
-	
 end #procedure button_press_double
 
 
 procedure button_pressed(button, timestamp)
 
+    #call print_hex32(timestamp)
+    #call endpoint_send(uart_ep, 2, "\r\n")
+
     button_timestamps(button*4:4) = timestamp 
     button_states(button:1) = btn_state_pressed
+
+    #temp = button_timestamps(button*4:4)
+    #call print_hex32(temp)
+    #call endpoint_send(uart_ep, 2, "\r\n")
     
 end # procedure button_pressed
-
 
 procedure button_released(button, timestamp)
 
@@ -210,7 +274,6 @@ procedure button_released(button, timestamp)
 			call button_press_short(button)
 		end if 
 	else
-		#both pressed
 		if button_states(0:1) = btn_state_pressed || button_states(1:1) = btn_state_pressed then
 			calllongpress = 1
 		else
@@ -224,26 +287,40 @@ end # procedure button_released
 
 event hardware_interrupt(interrupts, timestamp)
 
-    if (interrupts & led2_bank) = led2_bank then
+    #call endpoint_send(uart_ep, 5, "IRQ: ")
+    #call print_hex32(interrupts)
+    #call endpoint_send(uart_ep, 8, ", time: ")
+    #call print_hex32(timestamp)
+    #call endpoint_send(uart_ep, 2, "\r\n")
+
+    if (interrupts & btn0_pin_mask) = btn0_pin_mask then
         # read pin state to detect if this was falling or rising edge
-        call hardware_read_gpio(led_pin_maskC7, led2_bank)(res, read_result)
-        if read_result = led2_bank then
+        call hardware_read_gpio(btn0_bank, btn0_pin_mask)(res, read_result)
+    
+        if read_result = btn0_pin_mask then
+            #call endpoint_send(uart_ep, 15, "BTN0 RELEASED\r\n")
             call button_released(0, timestamp)
         else
+            #call endpoint_send(uart_ep, 14, "BTN0 PRESSED\r\n")
             call button_pressed(0, timestamp)
         end if
+        
     end if
     
-    if (interrupts & led3_bank) = led3_bank then
+    if (interrupts & btn1_pin_mask) = btn1_pin_mask then
         # read pin state to detect if this was falling or rising edge
-        call hardware_read_gpio(led_pin_maskF5, led3_bank)(res, read_result)  
-        if read_result = led3_bank then
+        call hardware_read_gpio(btn1_bank, btn1_pin_mask)(res, read_result)
+    
+        if read_result = btn1_pin_mask then
+            #call endpoint_send(uart_ep, 15, "BTN1 RELEASED\r\n")
             call button_released(1, timestamp)
         else
+            #call endpoint_send(uart_ep, 14, "BTN1 PRESSED\r\n")
             call button_pressed(1, timestamp)
         end if
+        
     end if
-	
+
 end
 
 
