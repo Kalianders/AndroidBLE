@@ -33,6 +33,8 @@ const btn_state_undefined = 0
 
 dim button_timestamps(8) # timestamp when button was pressed (2 * 4 bytes)
 dim time_delta
+dim num_notifications
+dim notif_countdown
 dim calllongpress
 
 # helper function to print integer to UART
@@ -92,37 +94,6 @@ event le_connection_closed(reason, connection)
 end
 
 
-# This event indicates incoming data from an endpoint. Used here to implement simple debug
-# command interface with the UART
-event endpoint_data(endpoint,data_len, data_data)
-
-    if endpoint != uart_ep then
-        return
-    end if
-        
-    if data_data(0:1) = ASCII_ESC then 
-        call endpoint_send(uart_ep, 10, "--ESC---\r\n")
-        # just a placeholder. you can enter any debug functionality here (e.g. disconnect if connection is active)
-        return
-    end if
-    
-end 
-
-
-# capture writes from remote device. 
-
-event gatt_server_attribute_value(connection,attribute,att_opcode,offset,value_len, value_data)
-    
-    if attribute = control_byte then
-        num_notifications = value_data(0:1) 
-        call endpoint_send(uart_ep, 25, "Num notifications set to ")
-        call print_int32(num_notifications)
-        call endpoint_send(uart_ep, 2, "\r\n")
-    end if
-	
-end
-
-
 # Software timer event - generated when software timer runs out
 event hardware_soft_timer(handle)
 
@@ -135,12 +106,6 @@ event hardware_soft_timer(handle)
 	adc_conv = adc_value * 3300 / 4096
 	call print_int32(adc_conv)
 	call endpoint_send(uart_ep, 2, "\r\n")
-	
-	# if connection is open, send notification to client including latest ADC reading in mV
-	if connected > 0 then
-		# call gatt_server_send_characteristic_notification(connection,characteristic,value_len, value_data)(result)
-		call gatt_server_send_characteristic_notification($ff, xgatt_adc_voltage, 2, adc_conv)
-	end if
 		
 end
 
@@ -159,6 +124,7 @@ procedure button_press_long(button)
 
     if button = 0 then 
         call endpoint_send(uart_ep, 22, "Long press, Button 0\r\n")
+        
     else 
         call endpoint_send(uart_ep, 22, "Long press, Button 1\r\n")
     end if 

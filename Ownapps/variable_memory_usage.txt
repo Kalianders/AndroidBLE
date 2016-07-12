@@ -65,7 +65,6 @@
 0:0	bt_connection_sniff
 0:0	bt_gap_discover_generic
 0:0	bt_gap_discover_limited
-0:0	control_byte
 0:0	endpoint_connection
 0:0	endpoint_drop
 0:0	endpoint_free
@@ -168,15 +167,15 @@
 0:0	sm_io_capability_keyboarddisplay
 0:0	sm_io_capability_keyboardonly
 0:0	sm_io_capability_noinputnooutput
-0:0	status_vector
 0:0	test_pkt_10101010
 0:0	test_pkt_11110000
 0:0	test_pkt_carrier
 0:0	test_pkt_prbs9
-0:0	xgatt_adc_voltage
 0:0	xgatt_alert
-0:0	xgatt_lloss
-0:0	xgatt_txpower
+0:0	xgatt_distance_onoff
+0:0	xgatt_gapsize
+0:0	xgatt_maxvalue
+0:0	xgatt_minvalue
 0:0	uart_ep
 0:0	led1_bank
 0:0	led2_bank
