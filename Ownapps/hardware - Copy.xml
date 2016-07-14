@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-
 <hardware>
-       
+	
 	<!-- UART configuration -->
 	<!-- Settings: @115200bps, no RTS/CTS and BGAPI serial protocol is enabled -->
 	<uart index="1" baud="115200" flowcontrol="false" bgapi="false" />
@@ -13,14 +12,12 @@
 	<!-- GPIO configuration for BTN0, BTN1 (pins PF6, PF7)-->
 	<gpio port="F" pin="4" mode="input" out="0" interrupt="both" />
 	<gpio port="F" pin="5" mode="input" out="0" interrupt="both" />
- 
-	<!-- ADC inputs: using PB11 and PF5 for testing. These are accessible in the devkit expansion header -->
-	<gpio port="B" pin="11" mode="input" out="0"/>
+
+	<!-- ADC inputs: using PC9 for testing. These are accessible in the devkit expansion header -->
+	<gpio port="C" pin="9" mode="input" out="0"/>
 	
 	<!-- ADCs enabled -->
 	<adc enable="true" />
 
 	<ctune value="0" />
-	
 </hardware>
-

@@ -1,17 +1,19 @@
 # Constants:
 const uart_ep = 2
 
-# LED0 is mapped to pin C9,C7
-const led1_bank      = 2
-const led2_bank      = 5
-const led3_bank      = 5
-const led_pin_maskC9  = $200
-const led_pin_maskF4  = $10
-const led_pin_maskF5 = $20
+# BTN0 is mapped to pin F4
+const btn0_bank      = 5
+const btn0_pin_mask  = $10
+
+# BTN1 is mapped to pin F5
+const btn1_bank      = 5
+const btn1_pin_mask  = $20
+
 
 # some ASCII codes (used in the debug command interface)
 const ASCII_ESC = 27
 
+# Variables:
 # Variables:
 dim ticker
 dim string(6)
@@ -37,6 +39,23 @@ dim num_notifications
 dim notif_countdown
 dim calllongpress
 
+
+
+# this is a utility function to print passkey but we can use it also to print
+# out ADC values...
+procedure print_passkey(data)
+
+    string(0:1) = (data / 100000) + (data / -1000000 * 10) + 48
+    string(1:1) = (data / 10000) + (data / -100000 * 10) + 48
+	string(2:1) = (data / 1000) + (data / -10000 * 10) + 48
+	string(3:1) = (data / 100) + (data / -1000 * 10) + 48
+	string(4:1) = (data / 10) + (data / -100 * 10) + 48
+	string(5:1) = data + (data / 10 * -10) + 48
+	
+	call endpoint_send(uart_ep, 6, string(0:6))
+	
+end 
+
 # helper function to print integer to UART
 procedure print_int32(int32_value)
 
@@ -51,7 +70,9 @@ event system_boot(major, minor, patch, build, bootloader, hw)
 
     call endpoint_send(uart_ep, 20, "Boot. Build number: ") 
     call print_int32(build)
-    call endpoint_send(uart_ep, 2, "\r\n") 
+    call endpoint_send(uart_ep, 2, "\r\n")  
+
+    
     num_notifications = 30 
     
     # Set advertisement interval to 100ms, use all three ADV channels
@@ -62,15 +83,9 @@ event system_boot(major, minor, patch, build, bootloader, hw)
     
     # setup timer with 1000ms interval
     call hardware_set_soft_timer(32768,0,0)
-	
-	# configure ADC reference voltage:
-	call endpoint_send(uart_ep, 21, "ADC reference: VDD \r\n")
-	call hardware_config_adc_reference(2)(res)
-	
-	#configure douplepress variable
-	calllongpress = 0
-	
+        
 end
+
 
 event le_connection_opened(address, address_type, master, connection, bonding)
 
@@ -94,20 +109,54 @@ event le_connection_closed(reason, connection)
 end
 
 
+# This event indicates incoming data from an endpoint. Used here to implement simple debug
+# command interface with the UART
+event endpoint_data(endpoint,data_len, data_data)
+
+    if endpoint != uart_ep then
+        return
+    end if
+        
+    if data_data(0:1) = ASCII_ESC then 
+        call endpoint_send(uart_ep, 10, "--ESC---\r\n")
+        # just a placeholder. you can enter any debug functionality here (e.g. disconnect if connection is active)
+        return
+    end if
+    
+end 
+
+
+# capture writes from remote device. 
+
+event gatt_server_attribute_value(connection,attribute,att_opcode,offset,value_len, value_data)
+    
+    if attribute = control_byte then
+    
+        num_notifications = value_data(0:1) 
+        
+        call endpoint_send(uart_ep, 25, "Num notifications set to ")
+        call print_int32(num_notifications)
+        call endpoint_send(uart_ep, 2, "\r\n")
+    end if
+end
+
 # Software timer event - generated when software timer runs out
 event hardware_soft_timer(handle)
-
+	
 	# ADC test: 
 
-	# read voltage at pin PC9
-	call hardware_read_adc(2, 9)(res, adc_value)
+	# read voltage at pin PB11
+	call hardware_read_adc(1, 11)(res, adc_value)
 	
 	# convert raw ADC value to millivolts:
 	adc_conv = adc_value * 3300 / 4096
-	call print_int32(adc_conv)
+	
+
+	call print_passkey(adc_conv)
 	call endpoint_send(uart_ep, 2, "\r\n")
-		
+	
 end
+
 
 procedure button_press_short(button)
 
@@ -174,26 +223,34 @@ end # procedure button_released
 
 event hardware_interrupt(interrupts, timestamp)
 
-    if (interrupts & led2_bank) = led2_bank then
+    if (interrupts & btn0_pin_mask) = btn0_pin_mask then
         # read pin state to detect if this was falling or rising edge
-        call hardware_read_gpio(led_pin_maskF4, led2_bank)(res, read_result)
-        if read_result = led2_bank then
+        call hardware_read_gpio(btn0_bank, btn0_pin_mask)(res, read_result)
+    
+        if read_result = btn0_pin_mask then
+            #call endpoint_send(uart_ep, 15, "BTN0 RELEASED\r\n")
             call button_released(0, timestamp)
         else
+            #call endpoint_send(uart_ep, 14, "BTN0 PRESSED\r\n")
             call button_pressed(0, timestamp)
         end if
+        
     end if
     
-    if (interrupts & led3_bank) = led3_bank then
+    if (interrupts & btn1_pin_mask) = btn1_pin_mask then
         # read pin state to detect if this was falling or rising edge
-        call hardware_read_gpio(led_pin_maskF5, led3_bank)(res, read_result)  
-        if read_result = led3_bank then
+        call hardware_read_gpio(btn1_bank, btn1_pin_mask)(res, read_result)
+    
+        if read_result = btn1_pin_mask then
+            #call endpoint_send(uart_ep, 15, "BTN1 RELEASED\r\n")
             call button_released(1, timestamp)
         else
+            #call endpoint_send(uart_ep, 14, "BTN1 PRESSED\r\n")
             call button_pressed(1, timestamp)
         end if
+        
     end if
-	
+
 end
 
 
