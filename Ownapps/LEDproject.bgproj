@@ -10,7 +10,7 @@
     
 	<!-- BGScript source code -->
 	<scripting>
-		<script in="test4.bgs" />
+		<script in="Thescriptbeforefinal.bgs" />
 	</scripting>
 	
 	<!-- Firmware output file -->

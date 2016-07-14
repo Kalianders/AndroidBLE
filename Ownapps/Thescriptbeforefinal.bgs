@@ -9,13 +9,10 @@ const btn0_pin_mask  = $10
 const btn1_bank      = 5
 const btn1_pin_mask  = $20
 
-
 # some ASCII codes (used in the debug command interface)
 const ASCII_ESC = 27
 
 # Variables:
-# Variables:
-dim ticker
 dim string(6)
 dim strlen
 
@@ -23,21 +20,33 @@ dim connected
 dim conn_handle
 dim res
 dim adc_value
-dim adc_conv
-dim temp
 dim read_result
 dim status_bytes(20)
+dim calllongpress
 
-dim button_states(2)    # state for each button 
+# state for each button 
+dim button_states(2) 
 const btn_state_pressed = 1
 const btn_state_released = 2 
 const btn_state_undefined = 0 
 
-dim button_timestamps(8) # timestamp when button was pressed (2 * 4 bytes)
+# timestamp when button was pressed (2 * 4 bytes)
+dim button_timestamps(8)
 dim time_delta
 dim num_notifications
 dim notif_countdown
-dim calllongpress
+
+#LED remote parameters
+dim minvalue
+dim maxvalue
+dim gapsize
+dim distance_onoff
+
+#More LED parameters
+dim tempvalue
+dim fadevalue
+dim statusint
+dim bluelight
 
 
 # helper function to print integer to UART
@@ -50,14 +59,8 @@ end
 
 
 # Boot event listener - Generated when the module is powered up or reset
+# Also configures default values
 event system_boot(major, minor, patch, build, bootloader, hw)
-
-    #call endpoint_send(uart_ep, 20, "Boot. Build number: ") 
-    call print_int32(build)
-    #call endpoint_send(uart_ep, 2, "\r\n")  
-
-    
-    #num_notifications = 30 
     
     # Set advertisement interval to 100ms, use all three ADV channels
     call le_gap_set_adv_parameters(160,160,7)
@@ -67,26 +70,49 @@ event system_boot(major, minor, patch, build, bootloader, hw)
     
     # setup timer with 1000ms interval
     call hardware_set_soft_timer(32768,0,0)
-        
+	
+	#set LED parameters
+	minvalue = 0
+	maxvalue = 255
+	gapsize = 51
+	distance_onoff = 0
+	statusint = 0
+	fadevalue = 0
+	tempvalue = 0
+	bluelight = 0
+	call print_int32(minvalue+1000)
+	call endpoint_send(uart_ep, 2, "\r\n")
+	call print_int32(maxvalue+2000)
+	call endpoint_send(uart_ep, 2, "\r\n")
+	call print_int32(gapsize+3000)
+	call endpoint_send(uart_ep, 2, "\r\n")
+	call print_int32(distance_onoff+4000)
+	call endpoint_send(uart_ep, 2, "\r\n")
+	call print_int32(statusint+5000)
+	call endpoint_send(uart_ep, 2, "\r\n")
+	call print_int32(fadevalue+6000)
+	call endpoint_send(uart_ep, 2, "\r\n")
+	call print_int32(bluelight+7000)
+	call endpoint_send(uart_ep, 2, "\r\n")
+	
 end
 
 
+# BLE connection connection event - Generated when a BLE connection is opened
 event le_connection_opened(address, address_type, master, connection, bonding)
 
-    call endpoint_send(uart_ep, 11, "Connected\r\n")
     connected = 1
     # make copy of connection handle for later use
     conn_handle = connection
 
 end
 
+
 # BLE connection disconnected event - Generated when a BLE connection is closed or lost
 event le_connection_closed(reason, connection)
 
-    call endpoint_send(uart_ep, 14, "Disconnected\r\n")
     connected = 0
     conn_handle = -1
-
     # Start Bluetooth LE advertisements and enable connections
     call le_gap_set_mode(2,2)
     
@@ -110,68 +136,146 @@ event endpoint_data(endpoint,data_len, data_data)
 end 
 
 
-# capture writes from remote device. 
+# capture writes from remote device. Remote device = Android Phone.
 
 event gatt_server_attribute_value(connection,attribute,att_opcode,offset,value_len, value_data)
     
-    if attribute = control_byte then
-    
-        num_notifications = value_data(0:1) 
-        
-        call endpoint_send(uart_ep, 25, "Num notifications set to ")
-        call print_int32(num_notifications)
-        call endpoint_send(uart_ep, 2, "\r\n")
+	if attribute = xgatt_minvalue then
+        minvalue = value_data(0:1) 
+		call print_int32(minvalue+1000)
+		call endpoint_send(uart_ep, 2, "\r\n")
     end if
+	
+	if attribute = xgatt_maxvalue then
+        maxvalue = value_data(0:1) 
+		call print_int32(maxvalue+2000)
+		call endpoint_send(uart_ep, 2, "\r\n")
+    end if
+	
+	if attribute = xgatt_gapsize then    
+        gapsize = value_data(0:1) 
+		call print_int32(gapsize+3000)
+		call endpoint_send(uart_ep, 2, "\r\n")
+    end if
+
+	if attribute = xgatt_distance_onoff then
+        distance_onoff = value_data(0:1) 
+		call print_int32(distance_onoff+4000)
+		call endpoint_send(uart_ep, 2, "\r\n")
+    end if
+	
 end
+
 
 # Software timer event - generated when software timer runs out
 event hardware_soft_timer(handle)
+	
+	if fadevalue > 0 then
+		statusint = 1
+	else 
+		statusint = 0
+	end if
+	
+	#statusled
+	if statusint > 0 then
+		call print_int32(5001)
+		call endpoint_send(uart_ep, 2, "\r\n")
+	end if
+	
+	if statusint = 0 then
+		call print_int32(5000)
+		call endpoint_send(uart_ep, 2, "\r\n")
+	end if
+	
+	if statusint = 2 then
+		call print_int32(5002)
+		call endpoint_send(uart_ep, 2, "\r\n")
+	end if 
 	
 	# ADC test: 
 
 	# read voltage at pin PB11
 	call hardware_read_adc(1, 11)(res, adc_value)
 	
-	# convert raw ADC value to millivolts:
-	adc_conv = adc_value * 3300 / 4096
-	
-
-	call print_passkey(adc_conv)
-	call endpoint_send(uart_ep, 2, "\r\n")
+	#test if value is changed 
+	if tempvalue - 15 > adc_value || adc_value > tempvalue + 15 then
+		tempvalue = adc_value
+		fadevalue = ((((maxvalue - minvalue)/255)*tempvalue)+minvalue)/16
+		if fadevalue < 10 then 
+			fadevalue = 0
+		end if
+		
+		call print_int32(fadevalue+6000)
+		call endpoint_send(uart_ep, 2, "\r\n")
+	end if 
 	
 end
 
 
+#Short button press procedure. This sets fadevalues
 procedure button_press_short(button)
 
     if button = 0 then 
-        call endpoint_send(uart_ep, 23, "Short press, Button 0\r\n")
+		fadevalue = fadevalue + gapsize
+		
+		if fadevalue > maxvalue then
+			fadevalue = maxvalue
+		end if
+		
+		if fadevalue < minvalue then
+			fadevalue = minvalue
+		end if
+		
     else 
-        call endpoint_send(uart_ep, 23, "Short press, Button 1\r\n")
-    end if 
+		fadevalue = fadevalue - gapsize
+		
+		if fadevalue > maxvalue then
+			fadevalue = maxvalue
+		end if
+		
+		if fadevalue < minvalue then
+			fadevalue = minvalue
+		end if
+
+    end if
+	
+	call print_int32(fadevalue+6000)
+	call endpoint_send(uart_ep, 2, "\r\n")
 	
 end 
 
 
+#Long button press procedure. This sets fadevalues
 procedure button_press_long(button)
 
     if button = 0 then 
-        call endpoint_send(uart_ep, 22, "Long press, Button 0\r\n")
-        
+        fadevalue = maxvalue   
     else 
-        call endpoint_send(uart_ep, 22, "Long press, Button 1\r\n")
-    end if 
+		fadevalue = minvalue
+    end if
+	
+	call print_int32(fadevalue+6000)
+	call endpoint_send(uart_ep, 2, "\r\n")
 	
 end #procedure long press
 
 
+#Double button press procedure. This is only triggered when both buttons are pressed same time. This sets blue light on/off
 procedure button_press_double()
 
-	call endpoint_send(uart_ep, 23, "Both Buttons pressed\r\n")
+	if bluelight = 0 then 
+		bluelight = 1 
+	else 
+		bluelight = 0
+	end if
+	
+	call print_int32(bluelight+7000)
+	call endpoint_send(uart_ep, 2, "\r\n")
 	
 end #procedure button_press_double
 
 
+#Button press procedure. Call other button press functions. 
 procedure button_pressed(button, timestamp)
 
     button_timestamps(button*4:4) = timestamp 
@@ -180,6 +284,7 @@ procedure button_pressed(button, timestamp)
 end # procedure button_pressed
 
 
+#Button release procedure. Records button release and calculates timedelta. 
 procedure button_released(button, timestamp)
 
     time_delta = timestamp - button_timestamps(button*4:4)
@@ -205,6 +310,7 @@ procedure button_released(button, timestamp)
 end # procedure button_released
 
 
+#Button press interrupt event. Interrups when button is pressed.
 event hardware_interrupt(interrupts, timestamp)
 
     if (interrupts & btn0_pin_mask) = btn0_pin_mask then

@@ -2,5 +2,3 @@ xgatt_minvalue 15
 xgatt_maxvalue 17
 xgatt_gapsize 19
 xgatt_distance_onoff 21
-control_byte 24
-status_vector 27

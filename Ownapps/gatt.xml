@@ -60,50 +60,24 @@
 		<!-- Minvalue, maxvalue, gapsize, distance_onoff-->
 		<characteristic uuid="91ca57bc-0d39-4f72-9527-046fc8f00302" id="xgatt_minvalue">
 			<properties read="true" write="true" />
-			<value length="1" />
+			<value length="1" type="hex"></value>
 		</characteristic>
 		
 		<characteristic uuid="a6e6ac7f-2eae-4af7-aebf-b82f56e07099" id="xgatt_maxvalue">
 			<properties read="true" write="true" />
-			<value length="1" />
+			<value length="1" type="hex"></value>
 		</characteristic>
 		
 		<characteristic uuid="1199cf31-50d9-455e-9df6-0572c411e3d9" id="xgatt_gapsize">
 			<properties read="true" write="true" />
-			<value length="1" />
+			<value length="1" type="hex"></value>
 		</characteristic>
 		
 		<characteristic uuid="a8c46a36-d45e-46dd-8607-95b8c87a52f9" id="xgatt_distance_onoff">
 			<properties read="true" write="true" />
-			<value length="1" />
+			<value length="1" type="hex"></value>
 		</characteristic>
 		
 	</service>
-	
-	<!-- Our custom  service is declared here -->    
-    <!-- UUID values generated with https://www.guidgenerator.com/ --> 
-
-
-    <service uuid="8409f408-63e3-4eea-aaf4-762ddec5319c" advertise="false">
-        <description>Button Service</description>
-        
-        <!-- one-byte characteristic that can be written by client. This can trigger some
-             functions in our device, for example blink led or play sound with buzzer... -->
-        <characteristic uuid="c5402b08-aee7-4892-b5c6-5b576203246b" id="control_byte">
-            <description>Control byte</description>
-            <properties read="true" write="true" />
-            <value length="1" type="hex"></value>
-        </characteristic>
-        
-        <!-- status vector (variable length) that can be used to push some data from server to client -->
-        <characteristic uuid="53de9102-a5ac-4df9-9afa-b63cfbe3df6e" id="status_vector">
-            <description>Status vector</description>
-            <properties notify="true" />
-            <value length="20" variable_length="true" type="hex"></value>
-        </characteristic>
-        
-        
-    </service>
-
-    
+ 
 </gatt>
