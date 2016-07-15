@@ -62,8 +62,8 @@ end
 # Also configures default values
 event system_boot(major, minor, patch, build, bootloader, hw)
     
-    # Set advertisement interval to 100ms, use all three ADV channels
-    call le_gap_set_adv_parameters(160,160,7)
+    # Set advertisement interval to 1000ms, use all three ADV channels
+    call le_gap_set_adv_parameters(1600,1600,7)
 
     # Start Bluetooth LE advertisements and enable connections
     call le_gap_set_mode(2,2)

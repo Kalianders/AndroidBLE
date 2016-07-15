@@ -20,7 +20,7 @@
 	<!-- ADCs enabled -->
 	<adc enable="true" />
 
-	<ctune value="0" />
+	<ctune value="270" />
 	
 </hardware>
 
