@@ -148,16 +148,41 @@ void rgbvalaistus(float fadeValue){
 
 //LED-funktiot
 void buttonfunc1() { // pot
-        arvo = analogRead(analogPin) / 4;
-        if (valiarvo - 15 > arvo || arvo > valiarvo + 15) {
-            valiarvo = arvo;
-            fadeValue = (((maxvalue - minvalue)/255)*valiarvo)+minvalue;
-            if (fadeValue < 10) {
-                fadeValue = 0;
-            }
-            rgbvalaistus(fadeValue);
-        }        
-    
+  /*
+    arvo = analogRead(analogPin) / 4;
+    if (valiarvo - 15 > arvo || arvo > valiarvo + 15) {
+        valiarvo = arvo;
+        fadeValue = (((maxvalue - minvalue)/255)*valiarvo)+minvalue;
+        if (fadeValue < 10) {
+            fadeValue = 0;
+        }
+    rgbvalaistus(fadeValue);
+  */
+        
+    arvo = analogRead(analogPin);
+    arvo = (arvo-250)/1.8;
+    if (arvo <= 10){
+        arvo = 0;
+    }
+    if (10 < arvo && arvo < 25){
+      valiarvo++;
+    }
+    else{
+      valiarvo = 0;
+    }
+    if (fadeValue-15 <= arvo && arvo <= fadeValue+15 && arvo < 256){
+        fadeValue = arvo;
+        rgbvalaistus(fadeValue);
+        millisdelay(10);
+        //Serial.print(arvo);
+        if (valiarvo > 8){
+          valiarvo = 0;
+          Serial.print("nyt");
+          blueOff(button1State, button2State);
+        }
+        Serial.print("\n");
+        
+    }  
 }
 
 void buttonfunc2(int button1State, int button2State) { // +light
