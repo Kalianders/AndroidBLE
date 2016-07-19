@@ -10,7 +10,7 @@
     
 	<!-- BGScript source code -->
 	<scripting>
-		<script in="Thescriptbeforefinal.bgs" />
+		<script in="Distancesensor.bgs" />
 	</scripting>
 	
 	<!-- Firmware output file -->
