@@ -4,7 +4,7 @@
        
 	<!-- UART configuration -->
 	<!-- Settings: @115200bps, no RTS/CTS and BGAPI serial protocol is enabled -->
-	<uart index="1" baud="115200" flowcontrol="false" bgapi="false" />
+	<uart index="1" baud="9600" flowcontrol="false" bgapi="false" />
 
 	<!-- GPIO configuration needed for WSTK UART to work-->
 	<gpio port="A" pin="5" mode="pushpull" out="1"/>

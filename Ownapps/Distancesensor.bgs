@@ -80,14 +80,14 @@ event system_boot(major, minor, patch, build, bootloader, hw)
 	fadevalue = 0
 	tempvalue = 0
 	bluelight = 0
-	call print_int32(minvalue+1000)
-	call endpoint_send(uart_ep, 2, "\r\n")
-	call print_int32(maxvalue+2000)
-	call endpoint_send(uart_ep, 2, "\r\n")
-	call print_int32(gapsize+3000)
-	call endpoint_send(uart_ep, 2, "\r\n")
-	call print_int32(distance_onoff+4000)
-	call endpoint_send(uart_ep, 2, "\r\n")
+	#call print_int32(minvalue+1000)
+	#call endpoint_send(uart_ep, 2, "\r\n")
+	#call print_int32(maxvalue+2000)
+	#call endpoint_send(uart_ep, 2, "\r\n")
+	#call print_int32(gapsize+3000)
+	#call endpoint_send(uart_ep, 2, "\r\n")
+	#call print_int32(distance_onoff+4000)
+	#call endpoint_send(uart_ep, 2, "\r\n")
 	call print_int32(statusint+5000)
 	call endpoint_send(uart_ep, 2, "\r\n")
 	call print_int32(fadevalue+6000)
@@ -169,6 +169,7 @@ end
 
 # Software timer event - generated when software timer runs out
 event hardware_soft_timer(handle)
+
 	
 	if fadevalue > 0 then
 		statusint = 1
@@ -199,9 +200,9 @@ event hardware_soft_timer(handle)
 	
 	#Use distance sensor
 	adc_value = (adc_value-80)*3
-	call print_int32(adc_value)
-	call endpoint_send(uart_ep, 2, "kk")
-	call endpoint_send(uart_ep, 2, "\r\n")
+	#call print_int32(adc_value)
+	#call endpoint_send(uart_ep, 2, "kk")
+	#call endpoint_send(uart_ep, 2, "\r\n")
 	
 	
 	if adc_value <= 0 then
