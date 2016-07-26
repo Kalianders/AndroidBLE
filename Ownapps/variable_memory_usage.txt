@@ -1,4 +1,4 @@
-108
+112
 0:0	ENDPOINT_FLAG_ACTIVE
 0:0	ENDPOINT_FLAG_BGAPI
 0:0	ENDPOINT_FLAG_CLOSING
@@ -205,4 +205,5 @@
 92:4	tempvalue
 96:4	fadevalue
 100:4	statusint
-104:4	bluelight
+104:4	prevstatusint
+108:4	bluelight

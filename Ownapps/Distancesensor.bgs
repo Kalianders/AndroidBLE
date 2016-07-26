@@ -46,6 +46,7 @@ dim distance_onoff
 dim tempvalue
 dim fadevalue
 dim statusint
+dim prevstatusint
 dim bluelight
 
 
@@ -80,20 +81,19 @@ event system_boot(major, minor, patch, build, bootloader, hw)
 	fadevalue = 0
 	tempvalue = 0
 	bluelight = 0
-	#call print_int32(minvalue+1000)
-	#call endpoint_send(uart_ep, 2, "\r\n")
-	#call print_int32(maxvalue+2000)
-	#call endpoint_send(uart_ep, 2, "\r\n")
-	#call print_int32(gapsize+3000)
-	#call endpoint_send(uart_ep, 2, "\r\n")
-	#call print_int32(distance_onoff+4000)
-	#call endpoint_send(uart_ep, 2, "\r\n")
-	call print_int32(statusint+5000)
-	call endpoint_send(uart_ep, 2, "\r\n")
-	call print_int32(fadevalue+6000)
-	call endpoint_send(uart_ep, 2, "\r\n")
-	call print_int32(bluelight+7000)
-	call endpoint_send(uart_ep, 2, "\r\n")
+
+	call endpoint_send(uart_ep, 2, "SS")
+	call print_int32(1000+statusint)
+	call endpoint_send(uart_ep, 1, "E")
+	
+	call endpoint_send(uart_ep, 2, "SF")
+	call print_int32(2000+fadevalue)
+	call endpoint_send(uart_ep, 1, "E")
+	
+
+	call endpoint_send(uart_ep, 2, "SB")
+	call print_int32(bluelight+3000)
+	call endpoint_send(uart_ep, 1, "E")
 	
 end
 
@@ -142,26 +142,22 @@ event gatt_server_attribute_value(connection,attribute,att_opcode,offset,value_l
     
 	if attribute = xgatt_minvalue then
         minvalue = value_data(0:1) 
-		call print_int32(minvalue+1000)
-		call endpoint_send(uart_ep, 2, "\r\n")
+
     end if
 	
 	if attribute = xgatt_maxvalue then
         maxvalue = value_data(0:1) 
-		call print_int32(maxvalue+2000)
-		call endpoint_send(uart_ep, 2, "\r\n")
+
     end if
 	
 	if attribute = xgatt_gapsize then    
         gapsize = value_data(0:1) 
-		call print_int32(gapsize+3000)
-		call endpoint_send(uart_ep, 2, "\r\n")
+
     end if
 
 	if attribute = xgatt_distance_onoff then
         distance_onoff = value_data(0:1) 
-		call print_int32(distance_onoff+4000)
-		call endpoint_send(uart_ep, 2, "\r\n")
+
     end if
 	
 end
@@ -178,20 +174,26 @@ event hardware_soft_timer(handle)
 	end if
 	
 	#statusled
-	if statusint > 0 then
-		call print_int32(5001)
-		call endpoint_send(uart_ep, 2, "\r\n")
-	end if
-	
-	if statusint = 0 then
-		call print_int32(5000)
-		call endpoint_send(uart_ep, 2, "\r\n")
-	end if
-	
-	if statusint = 2 then
-		call print_int32(5002)
-		call endpoint_send(uart_ep, 2, "\r\n")
+	if statusint != prevstatusint then
+		if statusint > 0 then
+			call endpoint_send(uart_ep, 2, "SS")
+			call print_int32(statusint+1000)
+			call endpoint_send(uart_ep, 1, "E")
+		end if
+		
+		if statusint = 0 then
+			call endpoint_send(uart_ep, 2, "SS")
+			call print_int32(statusint+1000)
+			call endpoint_send(uart_ep, 1, "E")
+		end if
+		
+		if statusint = 2 then
+			call endpoint_send(uart_ep, 2, "SS")
+			call print_int32(statusint+1000)
+			call endpoint_send(uart_ep, 1, "E")
+		end if
 	end if 
+	prevstatusint = statusint
 	
 	# ADC test: 
 
@@ -200,9 +202,6 @@ event hardware_soft_timer(handle)
 	
 	#Use distance sensor
 	adc_value = (adc_value-80)*3
-	#call print_int32(adc_value)
-	#call endpoint_send(uart_ep, 2, "kk")
-	#call endpoint_send(uart_ep, 2, "\r\n")
 	
 	
 	if adc_value <= 0 then
@@ -226,8 +225,9 @@ event hardware_soft_timer(handle)
 		tempvalue = adc_value
 		fadevalue = adc_value
 		
-		call print_int32(fadevalue+6000)
-		call endpoint_send(uart_ep, 2, "\r\n")
+		call endpoint_send(uart_ep, 2, "SF")
+		call print_int32(fadevalue+2000)
+		call endpoint_send(uart_ep, 1, "E")
 		
 	end if 
 		
@@ -262,8 +262,9 @@ procedure button_press_short(button)
 
     end if
 	
-	call print_int32(fadevalue+6000)
-	call endpoint_send(uart_ep, 2, "\r\n")
+	call endpoint_send(uart_ep, 2, "SF")
+	call print_int32(fadevalue+2000)
+	call endpoint_send(uart_ep, 1, "E")
 	
 end 
 
@@ -277,8 +278,9 @@ procedure button_press_long(button)
 		fadevalue = minvalue
     end if
 	
-	call print_int32(fadevalue+6000)
-	call endpoint_send(uart_ep, 2, "\r\n")
+	call endpoint_send(uart_ep, 2, "SF")
+	call print_int32(fadevalue+2000)
+	call endpoint_send(uart_ep, 1, "E")
 	
 end #procedure long press
 
@@ -292,8 +294,9 @@ procedure button_press_double()
 		bluelight = 0
 	end if
 	
-	call print_int32(bluelight+7000)
-	call endpoint_send(uart_ep, 2, "\r\n")
+	call endpoint_send(uart_ep, 2, "SB")
+	call print_int32(bluelight+3000)
+	call endpoint_send(uart_ep, 1, "E")
 	
 end #procedure button_press_double
 
