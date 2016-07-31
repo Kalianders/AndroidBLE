@@ -208,7 +208,11 @@ event hardware_soft_timer(handle)
 		adc_value = 0
 	end if
 	
-	if adc_value > 255 then
+	if adc_value > 330 then
+		adc_value = 10000
+	end if 
+	
+	if adc_value > 255 && adc_value < 330 then
 		adc_value = 255
 	end if 
 	
