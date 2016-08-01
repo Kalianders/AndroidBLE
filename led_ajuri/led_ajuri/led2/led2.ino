@@ -1,7 +1,7 @@
 // ledikirjasto
 #include <Adafruit_NeoPixel.h>
-#define STATUSPIN 4
-#define POWERPIN 5
+#define STATUSPIN 4 //oranssi maa = sininen 5v = punanen
+#define POWERPIN 5 // keltanen maa = vihreä  5v = ruskea
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(1, STATUSPIN, NEO_GRB + NEO_KHZ800);
 Adafruit_NeoPixel strip2 = Adafruit_NeoPixel(9, POWERPIN, NEO_GRB + NEO_KHZ800);
 
@@ -11,40 +11,38 @@ int fadeValue = 0;
 unsigned int integerValue = 0; // Max value is 65535
 char incomingByte;
 char b;
-String buf="";
-
+int jee=0;
 
 void setup() {
-  // put your setup code here, to run once:
 Serial.begin(9600); // Begin the serial monitor at 9600bps
 Serial1.begin(9600); // Begin the serial monitor at 9600bps
-    strip.begin();
-    strip2.begin();
+strip.begin();
+strip2.begin();
 }
 
 void loop() {
-    serialfunc();    
+    serialfunc();
     statusled();
     rgbvalaistus();
 }
 
 void statusled(){   // statusled code  
     if (statusint == 0) { // Standby, blue LED
-      uint32_t color1 = strip.Color(0, 0, 10);
-       for (uint16_t i = 0; i < strip.numPixels(); i++) {
+        uint32_t color1 = strip.Color(0,255, 0);
+        for (uint16_t i = 0; i < strip.numPixels(); i++) {
             strip.setPixelColor(i, color1);
-           strip.show();
+            strip.show();
         }
     }   
     if (statusint == 1) { // Light ON, green LED
-        uint32_t color1 = strip.Color(20, 20, 20);
+        uint32_t color1 = strip.Color(0, 0, 200);
         for (uint16_t i = 0; i < strip.numPixels(); i++) {
             strip.setPixelColor(i, color1);
             strip.show();
         }
     }    
     if (statusint == 2) { // ERROR, red LED
-        uint32_t color1 = strip.Color(10, 0, 0);
+        uint32_t color1 = strip.Color(255, 0, 0);
         for (uint16_t i = 0; i < strip.numPixels(); i++) {
             strip.setPixelColor(i, color1);
             strip.show();
@@ -70,85 +68,51 @@ void rgbvalaistus(){
 }
 
 void serialfunc(){                        //ottaa vastaan dataa
-    /*if (Serial.available() > 0) { // something came across serial
-        integerValue = 0; // throw away previous integerValue
-        while (1) { // force into a loop until '\n' is received
-            incomingByte = Serial.read();
-            if (incomingByte == '\n') break; // exit the while(1), we're done receiving
-            if (incomingByte == -1)   continue; // if no characters are in the buffer read() returns -1
-            integerValue *= 10; // shift left 1 decimal place
-            // convert ASCII to integer, add, and shift left 1 decimal place
-            integerValue = ((incomingByte - 48) + integerValue);
-            if (incomingByte != -1){
-              changeparameter(integerValue);
-            }
-        }
-    }*/
     while(Serial1.available())
     {
       Serial1.readBytes(&b, 1);
-      if(32<=b && b<=127 || b=='\r' || b=='\n')
+      if(32<=b && b<=125 || b=='\r' || b=='\n')
       {
-       //buf+="\e[0m";
-       buf+=b;
-       //Serial.print("\e[0m");
-       //Serial.write(b);
+        if (b == 'S')
+        {
+          Serial1.readBytes(&b, 1);
+          if (b == 'S' || b == 'F' || b == 'B')
+          {
+            Serial1.readBytes(&b, 1);
+            while (b != 'E')
+            {
+              jee = jee*10+(b-48);
+              Serial1.readBytes(&b, 1);
+            }
+            Serial.print(jee);
+            changeparameter(jee);
+            jee = 0;
+          }
+        }
       }
-      else
-      {
-        //buf+="\e[31m.";
-        //Serial.print("\e[31m.");
-      }
-    }
-    Serial.print(buf);
-    long jee = buf.toInt();
-    //Serial.print(jee);
-    //Serial.print('\n');
-    delay(70);
-    changeparameter(jee);
-    buf=""; 
-}
-
-void changeparameter(long value){ // muuttaa min/max arvoja
-    if (value >= 5000 && value < 5003) {
-        statusint = value - 5000;
-       /* Serial.print("statusint=");
-        Serial.print(statusint);
-        Serial.print("\n");*/
-    }
-    if (value >= 6000 && value < 6256) {
-        fadeValue = value - 6000;
-        Serial.print("fadeValue=");
-        Serial.print(fadeValue);
-        Serial.print("\n");
-    }
-    if (value >= 7000 && value <= 7001) {
-        kytkin = value - 7000;
-        Serial.print("kytkin=");
-        Serial.print(kytkin);
-        Serial.print("\n");
     }
 }
-
-/*void changeparameter(long value){ // muuttaa min/max arvoja
-    if (value == 5) {
-        statusint = value[3];
+void changeparameter(int value){ // muuttaa min/max arvoja
+    if (value >= 1000 && value < 1003) {
+        statusint = value - 1000;
         Serial.print("statusint=");
         Serial.print(statusint);
         Serial.print("\n");
     }
-    if (value[0] == 6) {
-        fadeValue = value[1]*100+value[2]*10+value[3];
+    if (value >= 2000 && value < 2256) {
+        fadeValue = value - 2000;
+        if (fadeValue < 10)
+        {
+          fadeValue = 0;
+        }
         Serial.print("fadeValue=");
         Serial.print(fadeValue);
         Serial.print("\n");
     }
-    if (value[0] == 7) {
-        kytkin = value[3];
+    if (value >= 3000 && value <= 3001) {
+        kytkin = value - 3000;
         Serial.print("kytkin=");
         Serial.print(kytkin);
         Serial.print("\n");
     }
-}*/
-
-
+}
