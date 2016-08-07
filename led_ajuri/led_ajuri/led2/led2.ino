@@ -101,10 +101,6 @@ void changeparameter(int value){ // muuttaa min/max arvoja
     }
     if (value >= 2000 && value < 2256) {
         fadeValue = value - 2000;
-        if (fadeValue < 10)
-        {
-          fadeValue = 0;
-        }
         Serial.print("fadeValue=");
         Serial.print(fadeValue);
         Serial.print("\n");

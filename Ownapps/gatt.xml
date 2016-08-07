@@ -12,7 +12,7 @@
         <!-- https://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.gap.device_name.xml -->
         <characteristic uuid="2a00">
             <properties read="true" const="true" />
-            <value>LEDCONFIGURE</value>
+            <value>PLANMECA</value>
         </characteristic>
 
         <!-- Appearances -->
@@ -29,7 +29,7 @@
     <service uuid="180A">
 
         <description>Device Information Service</description>
-    
+     
         <!-- Manufacturer name string -->
         <!-- https://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.manufacturer_name_string.xml -->
         <characteristic uuid="2A29">
