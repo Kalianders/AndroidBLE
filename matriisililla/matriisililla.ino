@@ -1,4 +1,4 @@
-// ledikirjasto
+// ledikirjasto proto 1.0
 #include <Adafruit_NeoPixel.h>
 #define STATUSPIN 6
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(9, STATUSPIN, NEO_GRB + NEO_KHZ800);
@@ -199,7 +199,7 @@ void buttonfunc3(int button1State, int button2State) { // -light
     }
 }
 
-void buttonfunc4(int button1State, int button2State) { // VIHREÄPOISSA
+void buttonfunc4(int button1State, int button2State) { // VIHREÃ„POISSA
     analogWrite(ledv, LOW);
     fadeValue = (maxvalue+minvalue)/2;
     analogWrite(ledp, fadeValue);
@@ -226,7 +226,7 @@ void buttonfunc4(int button1State, int button2State) { // VIHREÄPOISSA
 =======
 }
 void buttonfunc5(int button1State, int button2State) {
-    // VIHRE�POISSA
+    // VIHREÄPOISSA
     if (button2State == HIGH && button1State == HIGH) {
         analogWrite(ledv, LOW);
         fadeValue = 153;
